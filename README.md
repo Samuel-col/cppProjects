@@ -7,12 +7,13 @@ Here you can find several cpp projects i've done while im learning this programm
 ## List of Scripts
 
 * tali: Is a dice game that i copied from [Gnome](https://www.gnome.org/) Games. 
-* EliGauss: Contains several linear algebra matrix functions as determinant, inverse matrix and it solves linear equations systems.
+* LinAlg: Contains several linear algebra matrix functions as determinant, inverse matrix and it solves linear equations systems.
 * bases: Its a simple script that converts numbers from one base to another.
 * cribae: Prints the first n prime numbers using Eratostenes Cribe.
 * ficheros: Read and write text files.
 * interLag: Estimates functions values by using Lagrange Interpolation.
 * raices: Compares three common roots finders.
+* antiPri: Finds the first positive integer whose number of divisors is grater or equal that a certain value.
 
 
 ## Comment
