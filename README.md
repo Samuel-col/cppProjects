@@ -14,7 +14,7 @@ Here you can find several cpp projects i've done while im learning this programm
 * interLag: Estimates functions values by using Lagrange Interpolation.
 * raices: Compares three common roots finders.
 * antiPri: Finds the first positive integer whose number of divisors is grater or equal that a certain value.
-* compare: Compares two files in order to find if they have the same content or if they hava some difference.
+* compare: Compares two files in order to find if they have the same content or if they have some difference.
 
 
 ## Comment
