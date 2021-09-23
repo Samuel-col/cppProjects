@@ -18,6 +18,7 @@ Here you can find several cpp projects i've done while im learning this programm
 * GibbsSampler: Performs a bayesian analysis of some data as explained in the pdf file. Results are in .md and .html files.
 
 
-## Comment
+## Comments
 
-I must clarify that this repository isn't well documented, its just a personal project.
+* I must clarify that this repository isn't well documented, its just a personal project.
+* Some of this scripts would only perfectly run on Linux or depend on some libraries such as [gsl](https://www.gnu.org/software/gsl/).
