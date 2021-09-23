@@ -1,9 +1,9 @@
 <h1 id="análisis-bayesiano-de-las-horas-de-estudio-de-los-estudiantes-de-ocho-colegios">Análisis Bayesiano de las horas de estudio de los estudiantes de ocho colegios</h1>
 <h2 id="modelo-bayesiano-normal-jerarquico-con-varianza-común-a-los-colegios">Modelo bayesiano normal jerarquico con varianza común a los colegios</h2>
 <h5 id="samuel-sánchez">Samuel Sánchez</h5>
-<h5 id="wed-sep-15-204109-2021">Wed Sep 15 20:41:09 2021</h5>
+<h5 id="sat-sep-18-112754-2021">Sat Sep 18 11:27:54 2021</h5>
 <h2 id="muestreador">Muestreador</h2>
-<p>Se ejecutó el algoritmo con 1 iteraciones del periodo de calentamiento, 30 iteraciones reales y los siguientes valores iniciales:</p>
+<p>Se ejecutó el algoritmo con 1000 iteraciones del periodo de calentamiento, 200000 iteraciones reales y los siguientes valores iniciales:</p>
 <ul>
 <li><span class="math inline"><em>θ</em><sub><em>j</em></sub> = 0</span> para <span class="math inline"><em>j</em> = 1, 2, ..., 8.</span></li>
 <li><span class="math inline"><em>σ</em><sup>2</sup> = 100</span></li>
@@ -11,6 +11,7 @@
 <li><span class="math inline"><em>τ</em><sup>2</sup> = 100</span></li>
 </ul>
 <h2 id="evaluación-de-la-convergencia">Evaluación de la convergencia</h2>
+<p>Se calculó la cadena de log-verosimilitud y se evaluó su convergencia obteniendo que su autocorrelación de primer orden es de 0.0429203. Además, las auto correlaciones de segundo, tercer y cuarto orden son 0.00282944, -0.00075753 y -0.00464903 respectivamente. Por lo tanto, podemos concluir que el algoritmo converge con gran facilidad y se puede proceder a realizar el análisis e interpretación de los resultados.</p>
 <h2 id="medias-posteriores-e-intervalos-de-confianza-al-95">Medias posteriores e intervalos de confianza al 95%</h2>
 <table>
 <thead>
@@ -24,48 +25,50 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: center;"><span class="math inline"><em>σ</em><sup>2</sup></span></td>
-<td style="text-align: right;">13.9886</td>
-<td style="text-align: right;">13.9935</td>
-<td style="text-align: right;">14.1174</td>
+<td style="text-align: right;">12.289</td>
+<td style="text-align: right;">14.4778</td>
+<td style="text-align: right;">17.2993</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;"><span class="math inline"><em>μ</em></span></td>
-<td style="text-align: right;">7.45253</td>
-<td style="text-align: right;">7.4211</td>
-<td style="text-align: right;">7.43842</td>
+<td style="text-align: right;">6.99322</td>
+<td style="text-align: right;">7.56713</td>
+<td style="text-align: right;">8.33778</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;"><span class="math inline"><em>τ</em><sup>2</sup></span></td>
-<td style="text-align: right;">4.0009</td>
-<td style="text-align: right;">4.02708</td>
-<td style="text-align: right;">4.00915</td>
+<td style="text-align: right;">2.98179</td>
+<td style="text-align: right;">5.50184</td>
+<td style="text-align: right;">11.3033</td>
 </tr>
 </tbody>
 </table>
 <h2 id="estudio-de-r">Estudio de R</h2>
 <p><span class="math inline"><em>R</em> = <em>τ</em><sup>2</sup>/(<em>τ</em><sup>2</sup> + <em>σ</em><sup>2</sup>)</span></p>
 <h3 id="densidad-de-r">Densidad de R:</h3>
-<p>0.25169 - 0.250226 : ——</p>
-<p>0.250226 - 0.248761 :</p>
-<p>0.248761 - 0.247297 :</p>
-<p>0.247297 - 0.245832 :</p>
-<p>0.245832 - 0.244368 :</p>
-<p>0.244368 - 0.242904 :</p>
-<p>0.242904 - 0.241439 :</p>
-<p>0.241439 - 0.239975 :</p>
-<p>0.239975 - 0.23851 :</p>
-<p>0.23851 - 0.237046 :</p>
-<p>0.237046 - 0.235582 :</p>
-<p>0.235582 - 0.234117 :</p>
-<p>0.234117 - 0.232653 :</p>
-<p>0.232653 - 0.231188 :</p>
-<p>0.231188 - 0.229724 :</p>
-<p>0.229724 - 0.22826 :</p>
-<p>0.22826 - 0.226795 :</p>
-<p>0.226795 - 0.225331 :</p>
-<p>0.225331 - 0.223866 : ——</p>
-<p>0.223866 - 0.222402 : ———————————————-</p>
+<p>0.0683706 - 0.109597 :||</p>
+<p>0.109597 - 0.150823 :|||||||||||||||||||||||||||||||||||||</p>
+<p>0.150823 - 0.192049 :|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+<p>0.192049 - 0.233275 :|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+<p>0.233275 - 0.274501 :|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+<p>0.274501 - 0.315727 :||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+<p>0.315727 - 0.356953 :|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+<p>0.356953 - 0.398179 :|||||||||||||||||||||||||||||||||||||</p>
+<p>0.398179 - 0.439405 :||||||||||||||||||</p>
+<p>0.439405 - 0.480631 :|||||||||||</p>
+<p>0.480631 - 0.521857 :||||</p>
+<p>0.521857 - 0.563083 :||</p>
+<p>0.563083 - 0.604309 :|</p>
+<p>0.604309 - 0.645535 :</p>
+<p>0.645535 - 0.686761 :</p>
+<p>0.686761 - 0.727987 :</p>
+<p>0.727987 - 0.769213 :</p>
+<p>0.769213 - 0.810439 :</p>
+<p>0.810439 - 0.851665 :</p>
+<p>0.851665 - 0.892891 :</p>
 <h2 id="algunas-probabilidades">Algunas probabilidades</h2>
+<p><span class="math inline"><em>P</em>(<em>θ</em><sub>7</sub> &lt; <em>θ</em><sub>6</sub>) = 0.52416</span></p>
+<p><span class="math inline"><em>P</em>(<em>θ</em><sub>7</sub>=<em>m</em><em>i</em><em>n</em>{<em>θ</em><sub>1</sub>,<em>θ</em><sub>2</sub>,...,<em>θ</em><sub>8</sub>}) = 0.32524</span></p>
 <h2 id="comparación-de-medias-muestrales-y-medias-posteriores">Comparación de medias muestrales y medias posteriores</h2>
 <table>
 <thead>
@@ -81,49 +84,49 @@
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">25</td>
 <td style="text-align: right;">9.464</td>
-<td style="text-align: right;">9.1503</td>
+<td style="text-align: right;">9.24311</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">23</td>
 <td style="text-align: right;">7.03348</td>
-<td style="text-align: right;">7.00785</td>
+<td style="text-align: right;">7.10205</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">3</td>
 <td style="text-align: center;">20</td>
 <td style="text-align: right;">7.953</td>
-<td style="text-align: right;">7.7908</td>
+<td style="text-align: right;">7.90218</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">24</td>
 <td style="text-align: right;">6.23208</td>
-<td style="text-align: right;">6.30653</td>
+<td style="text-align: right;">6.39477</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">5</td>
 <td style="text-align: center;">24</td>
 <td style="text-align: right;">10.7658</td>
-<td style="text-align: right;">10.2797</td>
+<td style="text-align: right;">10.3774</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">6</td>
 <td style="text-align: center;">22</td>
 <td style="text-align: right;">6.205</td>
-<td style="text-align: right;">6.2888</td>
+<td style="text-align: right;">6.38481</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">7</td>
 <td style="text-align: center;">22</td>
 <td style="text-align: right;">6.13273</td>
-<td style="text-align: right;">6.22617</td>
+<td style="text-align: right;">6.32104</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">8</td>
 <td style="text-align: center;">20</td>
 <td style="text-align: right;">7.381</td>
-<td style="text-align: right;">7.30159</td>
+<td style="text-align: right;">7.41093</td>
 </tr>
 </tbody>
 </table>

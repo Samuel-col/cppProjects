@@ -1,4 +1,8 @@
 // Implementación computacional del taller 7 de estadística bayesiana en C++
+// Utilizaré GSL cuya documentación es la siguiente:
+// https://www.gnu.org/software/gsl/doc/html/
+// Compile este archivo con el siguiente comando:
+// g++ bayesGibbs.cpp -lgsl -lgslcblas -o gibbs
 
 #include "math.h"
 #include "random"
@@ -9,6 +13,9 @@
 #include "string"
 #include "ctime"
 #include "algorithm"
+#include "gsl/gsl_rng.h"
+#include "gsl/gsl_randist.h"
+#include "gsl/gsl_statistics_double.h"
 
 using namespace std;
 
@@ -24,17 +31,29 @@ double vecSum(double * A, int len);
 
 int vecSum(bool * A, int len);
 
-double rThetaj(double mu, double tau2, int nj, double yBarj, double sig2);
+double rThetaj(const gsl_rng *r,double mu, double tau2, int nj, double yBarj, double sig2);
 
-double rSigma2(double nu_0, int n, double sigma2_0, double SUM);
+double rSigma2(const gsl_rng *r,double nu_0, int n, double sigma2_0, double SUM);
 
-double rMu(double mu_0,double gamma2_0, int m, double theMean, double tau2);
+double rMu(const gsl_rng *r,double mu_0,double gamma2_0, int m, double theMean, double tau2);
 
-double rTau2(double eta_0, int m, double tau2_0, double SS);
+double rTau2(const gsl_rng *r,double eta_0, int m, double tau2_0, double SS);
+
+double autocorrelation(double * A, int len, int lag);
 
 int main(){
     //
     srand(time(NULL));
+
+		// Inicialización de la semilla de gsl
+		const gsl_rng_type * T;
+		gsl_rng * r;
+		time_t t;
+		gsl_rng_env_setup();
+		T = gsl_rng_default;
+		r = gsl_rng_alloc(T);
+		t = time(NULL);
+		gsl_rng_set(r,t);
 
     // Leer archivos
     vector<vector<double>> schools;
@@ -86,27 +105,27 @@ int main(){
 
         // Thetas
         for(int j=0;j<m;j++)
-            Thetas[j][0] = rThetaj(Mu[0],Tau2[0],sSize[j],schMeans[j],Sigma2[0]);
+            Thetas[j][0] = rThetaj(r,Mu[0],Tau2[0],sSize[j],schMeans[j],Sigma2[0]);
 
         // Sigma^2
         SUM = 0;
         for(int j=0;j<m;j++)
             for(double v: schools[j])
                 SUM += pow(v-Thetas[j][0],2);
-        Sigma2[0] = rSigma2(nu_0,n,sigma2_0,SUM);
+        Sigma2[0] = rSigma2(r,nu_0,n,sigma2_0,SUM);
 
         // Mu
         theMean = 0;
         for (int j=0;j<m;j++)
             theMean += Thetas[j][0];
         theMean /= m;
-        Mu[0] = rMu(mu_0,gamma2_0,m,theMean,Tau2[0]);
+        Mu[0] = rMu(r,mu_0,gamma2_0,m,theMean,Tau2[0]);
 
         // Tau^2
         SS = 0;
         for(int j=0;j<m;j++)
             SS += pow(Thetas[j][0]-Mu[0],2);
-        Tau2[0] = rTau2(eta_0,m,tau2_0,SS);
+        Tau2[0] = rTau2(r,eta_0,m,tau2_0,SS);
     }
 
     // Ejecusión del algoritmo
@@ -115,28 +134,29 @@ int main(){
 
         // Thetas
         for(int j=0;j<m;j++)
-            Thetas[j][i] = rThetaj(Mu[i-1],Tau2[i-1],sSize[j],schMeans[j],Sigma2[i-1]);
+            Thetas[j][i] = rThetaj(r,Mu[i-1],Tau2[i-1],sSize[j],schMeans[j],Sigma2[i-1]);
 
         // Sigma^2
         SUM = 0;
         for(int j=0;j<m;j++)
             for(double v: schools[j])
                 SUM += pow(v-Thetas[j][i],2);
-        Sigma2[i] = rSigma2(nu_0,n,sigma2_0,SUM);
+        Sigma2[i] = rSigma2(r,nu_0,n,sigma2_0,SUM);
 
         // Mu
         theMean = 0;
         for (int j=0;j<m;j++)
             theMean += Thetas[j][i];
         theMean /= m;
-        Mu[i] = rMu(mu_0,gamma2_0,m,theMean,Tau2[i-1]);
+        Mu[i] = rMu(r,mu_0,gamma2_0,m,theMean,Tau2[i-1]);
 
         // Tau^2
         SS = 0;
         for(int j=0;j<m;j++)
             SS += pow(Thetas[j][i]-Mu[i],2);
-        Tau2[i] = rTau2(eta_0,m,tau2_0,SS);
+        Tau2[i] = rTau2(r,eta_0,m,tau2_0,SS);
     }
+		gsl_rng_free(r);
     cout << "Simulación completada satisfactoriamente." << endl;
 
 		// Creación de archivo de resultados.
@@ -161,11 +181,27 @@ int main(){
 
     // Evaluación de la convergencia
 		out << "## Evaluación de la convergencia" << endl;
+		
+		// Vamos a calcular la cadena de la log-verosimilitud para evaluar la convergencia general del algoritmo.
+		double * logD;
+		logD = new double [B];
+		for(int i=0;i<B;i++){
+				*(logD+i) = 0; 
+				for(int j=0;j<m;j++)
+						for(double v: schools[j])
+								*(logD+i) += log(gsl_ran_gaussian_pdf(v-Thetas[j][i],Sigma2[i]));
+		}
 
+		double rho1 = gsl_stats_lag1_autocorrelation(logD,1,B);
+		out << "Se calculó la cadena de log-verosimilitud y se evaluó su convergencia obteniendo que su autocorrelación de primer orden es de " << rho1 << ". ";
+		
+		out << "Además, las auto correlaciones de segundo, tercer y cuarto orden son " << autocorrelation(logD, B, 2) << ", " << autocorrelation(logD, B, 3) << " y " << autocorrelation(logD, B, 4) << " respectivamente. ";
+		out << "Por lo tanto, podemos concluir que el algoritmo converge con gran facilidad y se puede proceder a realizar el análisis e interpretación de los resultados." << endl;
+		out << endl;
 
     // Medias posteriores e intervalos de confianza
 		out << "## Medias posteriores e intervalos de confianza al 95%" << endl;
-
+		
 		// Ordenar vectores
 		sort(Sigma2, Sigma2+B,[](int x, int y){ return x < y; });
 		sort(Mu, Mu+B,[](int x, int y){ return x < y; });
@@ -182,51 +218,68 @@ int main(){
 
 		// Densidad posterior de R
 		out << "## Estudio de R" << endl;
-		out << "$R=\\tau^2/(\\tau^2+\\sigma^2)$" << endl << endl;
+		out << "$R=\\tau^2/(\\tau^2+\\sigma^2)$" << endl;
+		out << endl;
 
 		double * R;
 		R = new double [B];
 		transform(Sigma2,Sigma2+B,Tau2,R,
 						[](double s,double t){return t/(s+t);});
 
-		sort(R, R+B,[](int x, int y){ return x < y; });
+		// sort(R, R+B,[](int x, int y){ return x < y; }); // No sirve
+		sort(R,R+B);
 
     double minR = *R, maxR = *(R+B-1),dr = (maxR - minR)/20.0;
 
-		vector<double> densityR(20);
+		/*
+		cout << "Ordenando R..." << endl;
+		cout << minR << " " << maxR << endl;
+		printVec(R,B);
+		*/
 
+		vector<double> densityR(20);
+		
 		for(int l=0;l<B;l++)
 				densityR[floor((*(R+l)-minR)/dr)]++;
-
+		
 		out << "### Densidad de R:" << endl;
 		for(int l=0;l<20;l++){
+				// out << out.setw(8) << out.setprecision(4) << minR+l*dr << " - " << minR+(l+1)*dr << " :";
+				// out << out.width(5) << minR+l*dr << " - " << out.width(5) << minR+(l+1)*dr << " :";
 				out << minR+l*dr << " - " << minR+(l+1)*dr << " :";
-				out << string(densityR[l]/B*200,'-') << endl << endl;
+				out << string(densityR[l]/B*700,'|') << endl;
+				out << endl;
 		}
-		out << endl << endl;
-
-        // printVec(densityR);
+		out << endl;
+		out << endl;
+				
 
     // P(the7<the6) y P(the7=min{the1,...,the8})
 		out << "## Algunas probabilidades" << endl;
 
-        bool * P1;
-        P1 = new bool [B];
-        transform(Thetas[7],Thetas[7]+B,Thetas[6],P1,
-            [](double x,double y){return x<y;});
-        double p1 = (double)vecSum(P1,B) / (double)B;
+		bool * P1;
+		P1 = new bool [B];
+		for(int l=0;l<B;l++)
+				*(P1+l) = Thetas[6][l] < Thetas[5][l];
+		// transform(Thetas[7],Thetas[7]+B,Thetas[6],P1,
+		// 		[](double x,double y){return x<y;});
+		double p1 = (double)vecSum(P1,B) / (double)B;
 
-        out << "$P(\\theta_7<\\theta_6)=$" << p1 << endl << endl;
+		out << "$P(\\theta_7<\\theta_6)=" << p1 << "$" << endl;
+		out << endl;
 
-        bool * P2;
-        P2 = new bool [B];
-        for(int l=0;l<B;l++)
-            *(P2+l) = (Thetas[7][l]<Thetas[1][l])*(Thetas[7][l]<Thetas[2][l])*(Thetas[7][l]<Thetas[3][l])*(Thetas[7][l]<Thetas[4][l])*(Thetas[7][l]<Thetas[5][l])*(Thetas[7][l]<Thetas[6][l])*(Thetas[7][l]<Thetas[8][l]);
-        double p2 = (double)vecSum(P2,B) / (double)B;
+		bool * P2;
+		P2 = new bool [B];
+		for(int l=0;l<B;l++)
+				*(P2+l) = (Thetas[6][l]<Thetas[1][l])*(Thetas[6][l]<Thetas[2][l])*(Thetas[6][l]<Thetas[3][l])*(Thetas[6][l]<Thetas[4][l])*(Thetas[6][l]<Thetas[5][l])*(Thetas[6][l]<Thetas[7][l])*(Thetas[6][l]<Thetas[0][l]); 
+		double p2 = (double)vecSum(P2,B) / (double)B;
 
-        out << "$P(\\theta_7=min\\{\\theta_1,\\theta_2,...,\\theta_8\\})=$" << p2 << endl << endl;
+		out << "$P\\left(\\theta_7=min\\{\\theta_1,\\theta_2,...,\\theta_8\\}\\right)=" << p2 << "$" << endl;
+		out << endl;
+		
 
     // Medias muestrales vs medias posteriores
+
 		vector<double> posMeans;
 		double tmp1;
 		for(int j=0;j<m;j++){
@@ -245,11 +298,9 @@ int main(){
 
 		out.close();
 
-        /*
 		cout << "Generando informe en html" << endl;
 		cout << "-> Recuerde que para que este paso se complete satisfactoriamente se requiere que pandoc esté instalada en el equipo y haga parte del path" << endl;
 		system("pandoc results.md -o results.html");
-        */
 
     return 0;
 }
@@ -303,42 +354,43 @@ int vecSum(bool * A, int len){
     return sum;
 }
 
-double rThetaj(double mu, double tau2, int nj, double yBarj, double sig2){
+double rThetaj(const gsl_rng *r,double mu, double tau2, int nj, double yBarj, double sig2){
     double V = 1.0/(1.0/tau2+nj/sig2);
     double vE = (mu/tau2+nj*yBarj/sig2)*V;
     //
-    default_random_engine e;
-    normal_distribution<double> dN(vE,V);
-    //
-    return dN(e);
+    return gsl_ran_gaussian(r,sqrt(V))+vE;
 }
 
-double rSigma2(double nu_0, int n, double sigma2_0, double SUM){
+double rSigma2(const gsl_rng *r,double nu_0, int n, double sigma2_0, double SUM){
     double A = (nu_0+n)/2;
     double _B = 2/(nu_0*sigma2_0+SUM);
     //
-    default_random_engine e;
-    gamma_distribution<double> dG(A,_B);
-    //
-    return 1.0/dG(e);
+		return 1.0/gsl_ran_gamma(r,A,_B);
 }
 
-double rMu(double mu_0,double gamma2_0, int m, double theMean, double tau2){
+double rMu(const gsl_rng *r,double mu_0,double gamma2_0, int m, double theMean, double tau2){
     double V = 1.0/(1.0/gamma2_0+m/tau2);
     double vE = (mu_0/gamma2_0+m*theMean/tau2)*V;
     //
-    default_random_engine e;
-    normal_distribution<double> dN(vE,V);
-    //
-    return dN(e);
+    return gsl_ran_gaussian(r,sqrt(V))+vE;
 }
 
-double rTau2(double eta_0, int m, double tau2_0, double SS){
+double rTau2(const gsl_rng *r,double eta_0, int m, double tau2_0, double SS){
     double A = (eta_0+m)/2;
     double _B = 2/(eta_0*tau2_0+SS);
     //
-    default_random_engine e;
-    gamma_distribution<double> dG(A,_B);
-    //
-    return 1.0/dG(e);
+		return 1.0/gsl_ran_gamma(r,A,_B);
+}
+
+double autocorrelation(double * A, int len, int lag){
+		double * A1;
+		double * A2;
+		A1 = new double [len-lag];
+		A2 = new double [len-lag];
+		for(int i=0;i<(len-lag);i++)
+				*(A1+i) = *(A+i);
+		for(int i=0;i<(len-lag);i++)
+				*(A2+i) = *(A+i+lag);
+		
+		return gsl_stats_correlation(A1,1,A2,1,len-lag);
 }
