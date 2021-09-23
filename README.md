@@ -15,8 +15,9 @@ Here you can find several cpp projects i've done while im learning this programm
 * raices: Compares three common roots finders.
 * antiPri: Finds the first positive integer whose number of divisors is grater or equal that a certain value.
 * compare: Compares two files in order to find if they have the same content or if they have some difference.
+* GibbsSampler: Performs a bayesian analysis of some data as explained in the pdf file. Results are in .md and .html files.
 
 
 ## Comment
 
-I must clarify that this repository is'nt well documented, its just a personal project.
+I must clarify that this repository isn't well documented, its just a personal project.
