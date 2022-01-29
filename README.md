@@ -16,6 +16,7 @@ Here you can find several cpp projects i've done while im learning this programm
 * antiPri: Finds the first positive integer whose number of divisors is grater or equal that a certain value.
 * compare: Compares two files in order to find if they have the same content or if they have some difference.
 * GibbsSampler: Performs a bayesian analysis of some data as explained in the pdf file. Results are in .md and .html files.
+* patron: A random character pattern generator for your terminal.
 
 
 ## Comments
